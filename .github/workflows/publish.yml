@@ -1,0 +1,64 @@
+name: Publish release image
+on:
+  release:
+    types: [published]
+permissions:
+  contents: read
+concurrency:
+  group: publish-moodle
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.event.release.prerelease == false && github.event.release.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      packages: write
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Validate release naming
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Extend deliberately when another Moodle version is supported.
+          [[ "$RELEASE_TAG" =~ ^v5\.0\.2(-r[1-9][0-9]*)?$ ]] || {
+            echo 'Expected v5.0.2 or v5.0.2-rN for this source baseline.' >&2
+            exit 1
+          }
+          echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+          echo "VERSION=${RELEASE_TAG#v}" >> "$GITHUB_ENV"
+      - name: Build release candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          for script in scripts/*.sh; do sh -n "$script"; done
+          docker build --platform linux/amd64 \
+            --build-arg PHP_IMAGE="$(sed -n 's/^PHP_IMAGE=//p' .env.example)" \
+            --build-arg MOODLE_COMMIT="$(sed -n 's/^MOODLE_COMMIT=//p' .env.example)" \
+            --label "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" \
+            --label "org.opencontainers.image.revision=$(git rev-parse HEAD)" \
+            --label "org.opencontainers.image.version=$VERSION" \
+            --label org.opencontainers.image.licenses=GPL-3.0-or-later \
+            --tag "$IMAGE:$VERSION" .
+      - name: Validate persistent volumes
+        run: TEST_IMAGE="$IMAGE:$VERSION" python3 tests/test_volumes.py
+      - name: Authenticate to GHCR
+        run: printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+      - name: Refuse replacement of an existing version
+        run: |
+          if docker manifest inspect "$IMAGE:$VERSION" >/dev/null 2>&1; then
+            echo 'This version already exists. Publish a new revision instead.' >&2
+            exit 1
+          fi
+      - name: Push the tested image
+        run: |
+          docker push "$IMAGE:$VERSION"
+          echo "Published: $IMAGE:$VERSION" >> "$GITHUB_STEP_SUMMARY"
+          docker image inspect "$IMAGE:$VERSION" --format '{{json .RepoDigests}}' >> "$GITHUB_STEP_SUMMARY"
+      - name: Log out
+        if: always()
+        run: docker logout ghcr.io

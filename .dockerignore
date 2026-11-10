@@ -1,0 +1,11 @@
+*
+!Dockerfile
+!config/
+!config/config.php
+!config/php.ini
+!config/apache.conf
+!scripts/
+!scripts/entrypoint.sh
+!scripts/cron.sh
+!scripts/readiness.php
+!scripts/init-code.sh

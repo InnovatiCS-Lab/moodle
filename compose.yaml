@@ -1,0 +1,77 @@
+name: moodle
+x-app: &app
+  image: ghcr.io/innovatics-lab/moodle:5.0.2
+  pull_policy: never
+  build:
+    context: .
+    args:
+      PHP_IMAGE: ${PHP_IMAGE:?Set an approved PHP image pinned by digest}
+      MOODLE_REF: v5.0.2
+      MOODLE_COMMIT: ${MOODLE_COMMIT:?Set the verified v5.0.2 commit}
+  environment: &app-env
+    MOODLE_DB_HOST: database
+    MOODLE_DB_PORT: "3306"
+    MOODLE_EMAIL_ENABLED: "no"
+    MOODLE_SSL_PROXY: "no"
+    MOODLE_DB_NAME: moodle
+    MOODLE_DB_USER: moodle
+    MOODLE_DB_PASSWORD: ${DB_PASSWORD:?Set a unique database password}
+    MOODLE_DB_PREFIX: ${MOODLE_DB_PREFIX:?Confirm the source database prefix}
+    MOODLE_WWWROOT: http://localhost:8090
+  volumes:
+    - moodle-code:/innovatics/moodle
+    - moodledata:/innovatics/moodledata
+  networks: [isolated]
+  depends_on:
+    database:
+      condition: service_healthy
+services:
+  database:
+    image: ${MARIADB_IMAGE:?Set an approved MariaDB image pinned by digest}
+    environment:
+      MARIADB_DATABASE: moodle
+      MARIADB_USER: moodle
+      MARIADB_PASSWORD: ${DB_PASSWORD:?Set a unique database password}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set a separate root password}
+    volumes:
+      - database-data:/var/lib/mysql
+    networks: [isolated]
+    healthcheck:
+      test: [CMD, healthcheck.sh, --connect, --innodb_initialized]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+  web:
+    <<: *app
+    ports: ["127.0.0.1:8090:80"]
+    networks: [isolated, browser]
+    healthcheck:
+      test: [CMD, php, /opt/moodle/readiness.php]
+      interval: 30s
+      timeout: 20s
+      start_period: 60s
+      retries: 5
+  cron:
+    <<: *app
+    profiles: [cron]
+    depends_on:
+      web:
+        condition: service_healthy
+    stop_signal: SIGTERM
+    stop_grace_period: 60s
+    user: www-data
+    command: [/usr/local/bin/cron.sh]
+    environment:
+      <<: *app-env
+      MOODLE_CRON_ENABLED: "no"
+    healthcheck:
+      disable: true
+volumes:
+  database-data:
+  moodle-code:
+  moodledata:
+networks:
+  isolated:
+    internal: true
+  browser:
+    driver: bridge
