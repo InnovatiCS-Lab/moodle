@@ -13,12 +13,16 @@ Status: local restore and database upgrade completed. Use separate volumes for t
 
 Sources: [Moodle 5.3 requirements](https://moodledev.io/general/releases/5.3), [upgrading Moodle](https://docs.moodle.org/503/en/Upgrading_Moodle).
 
+## Production procedure
+
+Use the shared [Coolify upgrade runbook](../coolify/upgrade.md). These notes cover the rehearsed **5.0.2 → 5.3.0** path; other source versions require their own requirements and plugin review. Keep this file for 5.3-specific differences rather than duplicating the runbook.
+
 ## Rehearsal sequence
 
 1. Build and validate the new image on disposable volumes with a fresh database.
 2. Take a current backup of database, code/plugins, moodledata and deployment configuration; verify checksums. Keep it outside the repository.
 3. Restore that database into a separate MariaDB 11.4.13 instance and restore moodledata into a separate volume.
-4. Initialise a fresh code volume from the new image image. Do not overlay 5.0 core code or copy its config.php. The entrypoint deliberately refuses a different-version code volume.
+4. Initialise a fresh code volume from the new image. Do not overlay 5.0 core code or copy its config.php. The entrypoint deliberately refuses a different-version code volume.
 5. Inventory **all** installed non-core plugins, not just the active theme. Copy only reviewed compatible extensions to their new paths under `public/`. Retain originals and any patches privately. Missing plugins are a stop condition, not permission to uninstall their data.
 6. Keep email disabled, cron stopped and browser access local/restricted. External plugin integrations also require review: disabling Moodle email is not a network sandbox.
 7. Run Moodle's CLI upgrade as www-data against the restored copy. Capture its output and compare account/course counts before and after.

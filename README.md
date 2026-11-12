@@ -58,6 +58,8 @@ A restored Moodle 5.0.2 site has also completed the CLI upgrade to 5.3 locally. 
 
 Use the same image for web and cron. Keep the database on a private network, configure HTTPS at the reverse proxy, and store secrets outside the repository. Startup does not automatically upgrade your database or replace existing Moodle code. Changing the image tag alone is not a complete upgrade procedure.
 
+For Coolify, start with the [deployment template and console instructions](coolify/README.md) and [upgrade commands with rollback](coolify/upgrade.md).
+
 Before upgrading, back up the database, code and moodledata together and rehearse restoration. See [5.3 upgrade guide](docs/upgrade-5.3.md), [persistent layout](docs/persistent-layout.md) and [runtime configuration](docs/runtime.md).
 
 ## License
