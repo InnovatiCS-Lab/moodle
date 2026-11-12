@@ -1,23 +1,24 @@
-# Baseline release status
+# Releases and version policy
 
-Scope: Moodle 5.0.2 same-version container migration. Upgrades are deferred. Pins reproduce the migration baseline; they are not a claim of current security support.
+## Repository structure
 
-## Verified locally
+`main` contains the current development source. Each release has a Git tag and a GitHub Release that preserve its exact source and documentation. Use a maintenance branch only when an older version requires ongoing fixes; do not duplicate the entire project into version folders.
 
-- Public image build and Apache syntax.
-- Empty code/data volume initialisation and persistence across replacement.
-- Third-party theme persisted without rebuilding the image.
-- Existing site restored into separate code, data and database volumes using the same public image; UI/files and container replacement passed user validation.
+## Naming
 
-Earlier runtime tests covered SMTP delivery, cron SIGTERM shutdown and local HTTPS. These should be repeated for the final persistent-layout deployment, not assumed to prove the final production configuration.
+- Git release `v5.3.0` publishes image `ghcr.io/innovatics-lab/moodle:5.3.0`.
+- Packaging or dependency fixes for the same Moodle version use `v5.3.0-r1`, then `-r2`, and matching image tags.
+- Published version tags must not be moved or overwritten. The workflow checks for an existing registry tag and refuses replacement. This is a workflow guard, not registry-enforced immutability; restrict package write access too.
+- Production deployments use an explicitly selected version. No automatic Coolify deployment is triggered.
 
-## Remaining release gates
+## CI and publication
 
-- Test version-mismatch and interrupted-initialisation guards and concurrent startup.
-- Finalise packaging-code license and distribution/source notices before publishing.
-- Add CI build/validation, image scanning and immutable release identifiers.
-- Review source, Git contents and image layers for secrets/private material.
-- Validate final Coolify Compose, HTTPS, cron, SMTP and backup/rollback.
-- Publish the reviewed artifact, test pulling it, and schedule fresh-backup cutover.
+Pushes and pull requests run validation only. Publishing a non-prerelease GitHub Release runs the publication workflow: build, volume tests, fresh-install/HTTP tests, registry availability check, then push the tested image. Merely pushing a Git tag does not publish with the current workflow.
 
-No Git repository or registry package has been created.
+Release builds currently target Linux AMD64. Do not advertise ARM64 support until it is built and tested.
+
+## Validation record
+
+5.0.2 was published and deployed following a successful restore rehearsal. For 5.3.0, local validation includes volume guards, fresh installation and a successful 5.0.2-to-5.3 database upgrade on a restored site. Final registry-pull testing and production rollout follow publication.
+
+Before each release, review changes and dependencies, run CI, check for private files and credentials, and review vulnerability scan results. Passing functional tests does not establish that an image has no vulnerabilities. Preserve release notes and rollback instructions alongside the release.

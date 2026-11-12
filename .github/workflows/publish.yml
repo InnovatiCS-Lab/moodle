@@ -10,28 +10,29 @@ concurrency:
 jobs:
   publish:
     if: github.event.release.prerelease == false && github.event.release.draft == false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 40
     permissions:
       contents: read
       packages: write
     env:
       RELEASE_TAG: ${{ github.event.release.tag_name }}
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
       - name: Validate release naming
         shell: bash
         run: |
           set -euo pipefail
           # Extend deliberately when another Moodle version is supported.
-          [[ "$RELEASE_TAG" =~ ^v5\.0\.2(-r[1-9][0-9]*)?$ ]] || {
-            echo 'Expected v5.0.2 or v5.0.2-rN for this source baseline.' >&2
+          [[ "$RELEASE_TAG" =~ ^v5\.3\.0(-r[1-9][0-9]*)?$ ]] || {
+            echo 'Expected v5.3.0 or v5.3.0-rN for this source.' >&2
             exit 1
           }
           echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
           echo "VERSION=${RELEASE_TAG#v}" >> "$GITHUB_ENV"
-      - name: Build release candidate
+      - name: Build release image
         shell: bash
         run: |
           set -euo pipefail
@@ -46,12 +47,24 @@ jobs:
             --tag "$IMAGE:$VERSION" .
       - name: Validate persistent volumes
         run: TEST_IMAGE="$IMAGE:$VERSION" python3 tests/test_volumes.py
+      - name: Test fresh installation and HTTP isolation
+        env:
+          TEST_DB_IMAGE: mariadb:11.4.13
+        run: TEST_IMAGE="$IMAGE:$VERSION" python3 tests/test_install.py
       - name: Authenticate to GHCR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
       - name: Refuse replacement of an existing version
         run: |
-          if docker manifest inspect "$IMAGE:$VERSION" >/dev/null 2>&1; then
+          set -eu
+          if docker manifest inspect "$IMAGE:$VERSION" > /tmp/manifest-check.log 2>&1; then
             echo 'This version already exists. Publish a new revision instead.' >&2
+            exit 1
+          fi
+          if ! grep -Eqi 'manifest unknown|no such manifest' /tmp/manifest-check.log; then
+            cat /tmp/manifest-check.log >&2
+            echo 'Registry check failed; refusing to publish without verifying tag availability.' >&2
             exit 1
           fi
       - name: Push the tested image

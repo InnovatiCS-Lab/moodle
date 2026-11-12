@@ -17,7 +17,7 @@ if [ -z "$(find "$code" -mindepth 1 -maxdepth 1 ! -name .image-init.lock -print 
     printf '%s\n' '<?php require "/opt/moodle/runtime/config.php";' > "$code/config.php"
     rm "$code/.image-init-incomplete"
 fi
-if ! cmp -s "$seed/version.php" "$code/version.php"; then
+if ! cmp -s "$seed/public/version.php" "$code/public/version.php"; then
     echo 'Persistent Moodle core does not match this image. No files were upgraded. Use the documented migration/upgrade procedure.' >&2
     exit 1
 fi

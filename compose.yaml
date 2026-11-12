@@ -1,13 +1,13 @@
 name: moodle
 x-app: &app
-  image: ghcr.io/innovatics-lab/moodle:5.0.2
+  image: ghcr.io/innovatics-lab/moodle:5.3.0
   pull_policy: never
   build:
     context: .
     args:
       PHP_IMAGE: ${PHP_IMAGE:?Set an approved PHP image pinned by digest}
-      MOODLE_REF: v5.0.2
-      MOODLE_COMMIT: ${MOODLE_COMMIT:?Set the verified v5.0.2 commit}
+      MOODLE_REF: ${MOODLE_REF:-v5.3.0}
+      MOODLE_COMMIT: ${MOODLE_COMMIT:?Set the verified Moodle commit}
   environment: &app-env
     MOODLE_DB_HOST: database
     MOODLE_DB_PORT: "3306"
@@ -27,7 +27,7 @@ x-app: &app
       condition: service_healthy
 services:
   database:
-    image: ${MARIADB_IMAGE:?Set an approved MariaDB image pinned by digest}
+    image: ${MARIADB_IMAGE:?Set a tested MariaDB version}
     environment:
       MARIADB_DATABASE: moodle
       MARIADB_USER: moodle

@@ -8,4 +8,4 @@ MOODLE_SSL_PROXY=yes is for a trusted TLS-terminating proxy. Do not publicly exp
 
 Cron uses the same image, database and data volume, runs as www-data, and requires MOODLE_CRON_ENABLED=yes. Set stop_signal: SIGTERM on cron and a sufficient stop_grace_period. Preserve Apache’s stop signal for web. The local example keeps cron disabled even if its profile is selected; explicitly change that only on reviewed test data.
 
-Keep compatible themes/plugins in /innovatics/moodle using a reviewed server-side migration script; no private image is required. Do not mount an entire old core code tree over the updated image. No automatic database upgrade occurs at startup.
+Keep compatible themes/plugins in /innovatics/moodle/public using a reviewed server-side migration script; no private image is required. Do not mount an entire old core code tree over the updated image. No automatic database upgrade occurs at startup.
