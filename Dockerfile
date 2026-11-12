@@ -1,8 +1,9 @@
-# Pass an approved PHP 8.2 Apache Bookworm image pinned by digest.
-ARG PHP_IMAGE
+# Reproducible base; deployments continue to use readable release tags.
+ARG PHP_IMAGE=php:8.4.27-apache-bookworm@sha256:5d55c49594dd833e2e4ff677b65f7d8ff48817f443a60691d9b2b382413bba42
+FROM composer:2.11.2@sha256:ca11f643d7791ebdd90a34fc20caf11380d434007ae539a9ea75cd9212e13dca AS composer
 FROM ${PHP_IMAGE} AS core
-ARG MOODLE_REF=v5.0.2
-ARG MOODLE_COMMIT
+ARG MOODLE_REF=v5.3.0
+ARG MOODLE_COMMIT=42622298fe06f9626d988d60b2bf589bd8f850e8
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git ca-certificates util-linux libicu-dev libzip-dev libpng-dev libjpeg62-turbo-dev \
     libfreetype6-dev libxml2-dev libonig-dev libpq-dev \
@@ -18,6 +19,11 @@ RUN test -n "$MOODLE_COMMIT" \
  && mkdir -p /opt/moodle/core \
  && git archive FETCH_HEAD | tar -x -C /opt/moodle/core \
  && rm -rf /tmp/moodle
+COPY --from=composer /usr/bin/composer /tmp/composer
+RUN cd /opt/moodle/core \
+ && php /tmp/composer install --no-dev --prefer-dist --no-interaction --no-plugins --no-scripts \
+ && php /tmp/composer check-platform-reqs --no-dev \
+ && rm -rf /tmp/composer /root/.composer /root/.cache/composer
 COPY config/config.php /opt/moodle/runtime/config.php
 COPY config/php.ini /usr/local/etc/php/conf.d/zz-moodle.ini
 COPY config/apache.conf /etc/apache2/conf-available/moodle.conf
@@ -28,7 +34,7 @@ RUN a2enconf moodle \
  && mkdir -p /innovatics/moodle /innovatics/moodledata \
  && chown www-data:www-data /innovatics/moodledata \
  && rmdir /var/www/html \
- && ln -s /innovatics/moodle /var/www/html \
+ && ln -s /innovatics/moodle/public /var/www/html \
  && php -r 'foreach (["mysqli","intl","zip","gd","soap","mbstring","curl","sodium","xml","Zend OPcache"] as $e) { if (!extension_loaded($e)) {fwrite(STDERR, "Missing extension: $e\n"); exit(1);} }' \
  && php -l /opt/moodle/runtime/config.php \
  && php -l /opt/moodle/readiness.php

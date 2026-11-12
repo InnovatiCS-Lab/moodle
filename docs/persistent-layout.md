@@ -1,6 +1,9 @@
 # Persistent code and data
 
-One image: ghcr.io/innovatics-lab/moodle:5.0.2 (local tag until published). Two application volumes: /innovatics/moodle for code including plugins/themes, /innovatics/moodledata for uploaded data. Database storage is separate.
+For the 5.3 candidate, see [upgrade details](upgrade-5.3.md). Apache serves `/innovatics/moodle/public`, and the version guard checks `public/version.php`. The following describes the released 5.0.2 layout.
+
+
+One image: ghcr.io/innovatics-lab/moodle:5.0.2 (released). Two application volumes: /innovatics/moodle for code including plugins/themes, /innovatics/moodledata for uploaded data. Database storage is separate.
 
 The image carries pristine Moodle in /opt/moodle/core and runtime configuration in /opt/moodle/runtime/config.php. Apache serves the persistent code through /var/www/html, a symlink. On an empty code volume the root entrypoint copies the seed under an exclusive lock and creates a small config.php wrapper. It does not install the database. An interrupted copy fails closed on the next start.
 
@@ -10,4 +13,4 @@ For migration: initialise a NEW code volume from the image, copy compatible thir
 
 Upgrades are out of scope for this same-version baseline. Changing the image tag to a different Moodle core does NOT silently update persistent code. A tested explicit upgrade command must be supplied before advertising that workflow. Never remove production volumes to bypass the guard.
 
-Local Compose uses pull_policy: never while this image has not been published. Build first. A community production template will use the released registry artifact, not this local build policy. Existing private test Compose files still use the old layout and are deliberately unchanged until this refactor passes isolated tests.
+The original local Compose used pull_policy: never while this image has not been published. Build first. A community production template will use the released registry artifact, not this local build policy. Existing private test Compose files still use the old layout and are deliberately unchanged until this refactor passes isolated tests.

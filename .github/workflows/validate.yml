@@ -7,14 +7,16 @@ permissions:
   contents: read
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
       - name: Check shell syntax
         run: |
           for script in scripts/*.sh; do sh -n "$script"; done
-      - name: Build migration baseline
+      - name: Build Moodle image
         run: |
           docker build \
             --build-arg PHP_IMAGE="$(sed -n 's/^PHP_IMAGE=//p' .env.example)" \
@@ -24,3 +26,7 @@ jobs:
         env:
           TEST_IMAGE: moodle-ci:test
         run: python3 tests/test_volumes.py
+      - name: Test fresh installation and HTTP isolation
+        env:
+          TEST_DB_IMAGE: mariadb:11.4.13
+        run: TEST_IMAGE="moodle-ci:test" python3 tests/test_install.py
