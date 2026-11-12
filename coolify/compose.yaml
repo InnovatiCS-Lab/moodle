@@ -1,0 +1,48 @@
+# Coolify deployment. Enable email and the scheduled cron task after validation.
+services:
+  database:
+    image: mariadb:11.4.13
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: moodle
+      MARIADB_USER: moodle
+      MARIADB_PASSWORD: ${SERVICE_PASSWORD_MOODLEDB}
+      MARIADB_ROOT_PASSWORD: ${SERVICE_PASSWORD_DBROOT}
+    volumes:
+      - database-data:/var/lib/mysql
+    healthcheck:
+      test: [CMD, healthcheck.sh, --connect, --innodb_initialized]
+      interval: 10s
+      timeout: 5s
+      start_period: 60s
+      retries: 12
+  web:
+    image: ghcr.io/innovatics-lab/moodle:5.3.0
+    restart: unless-stopped
+    environment:
+      SERVICE_URL_WEB_80: ""
+      MOODLE_DB_HOST: database
+      MOODLE_DB_PORT: "3306"
+      MOODLE_DB_NAME: moodle
+      MOODLE_DB_USER: moodle
+      MOODLE_DB_PASSWORD: ${SERVICE_PASSWORD_MOODLEDB}
+      MOODLE_DB_PREFIX: mdl_
+      MOODLE_WWWROOT: ${MOODLE_WWWROOT}
+      MOODLE_SSL_PROXY: "yes"
+      MOODLE_EMAIL_ENABLED: ${MOODLE_EMAIL_ENABLED:-no}
+    volumes:
+      - moodle-code:/innovatics/moodle
+      - moodledata:/innovatics/moodledata
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, php, /opt/moodle/readiness.php]
+      interval: 30s
+      timeout: 20s
+      start_period: 120s
+      retries: 5
+volumes:
+  database-data:
+  moodle-code:
+  moodledata:
