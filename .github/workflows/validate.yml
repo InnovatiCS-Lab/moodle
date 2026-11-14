@@ -20,6 +20,7 @@ jobs:
         run: |
           docker build \
             --build-arg PHP_IMAGE="$(sed -n 's/^PHP_IMAGE=//p' .env.example)" \
+            --build-arg MOODLE_REF="$(sed -n 's/^MOODLE_REF=//p' .env.example)" \
             --build-arg MOODLE_COMMIT="$(sed -n 's/^MOODLE_COMMIT=//p' .env.example)" \
             --tag moodle-ci:test .
       - name: Test isolated persistent volumes

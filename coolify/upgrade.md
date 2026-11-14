@@ -2,7 +2,7 @@
 
 For this image → this image, using a **new stack and new volumes**. Run server commands in **Bash as root on the Docker host**. Run sections separately; stop at any error. Rehearse the same procedure on an isolated copy first.
 
-Read the target notes: [5.0.2 → 5.3.0](../docs/upgrade-5.3.md). Never change only the image tag on an old code volume, or attach a newer MariaDB to the old raw database volume.
+Read the target notes: [5.0.2 → 5.3.0](../docs/upgrade-5.3.md) or [5.3.0 → 5.3.1](../docs/upgrade-5.3.1.md). Never change only the image tag on an old code volume, or attach a newer MariaDB to the old raw database volume.
 
 ## 1. Prepare, while the live site stays open
 
@@ -21,11 +21,11 @@ OLD_WEB='web-REPLACE_OLD_SERVICE_ID'
 OLD_DB='database-REPLACE_OLD_SERVICE_ID'
 NEW_WEB='web-REPLACE_NEW_SERVICE_ID'
 NEW_DB='database-REPLACE_NEW_SERVICE_ID'
-TARGET_IMAGE='ghcr.io/innovatics-lab/moodle:5.3.0'
+TARGET_IMAGE='ghcr.io/innovatics-lab/moodle:5.3.1'
 BACKUP="/root/moodle-backups/$(date -u +%Y%m%dT%H%M%SZ)"
 umask 077
 mkdir -p "$BACKUP"
-docker stop --time 60 "$NEW_WEB"
+docker stop --timeout 60 "$NEW_WEB"
 docker inspect "$OLD_WEB" "$OLD_DB" "$NEW_WEB" "$NEW_DB" >/dev/null
 df -h /
 free -h
@@ -43,7 +43,7 @@ docker top "$OLD_WEB" -eo pid,user,etime,args
 Once workers have finished, stop old web; keep old database running for the dump. No other service may write to it during this backup.
 
 ```bash
-docker stop --time 60 "$OLD_WEB"
+docker stop --timeout 60 "$OLD_WEB"
 docker inspect "$OLD_WEB" "$OLD_DB" > "$BACKUP/containers.private.json"
 # Copy/export the old Coolify Compose and environment configuration into
 # $BACKUP/deployment/ privately before proceeding (contains secrets).

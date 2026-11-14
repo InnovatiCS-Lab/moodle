@@ -17,7 +17,8 @@ Images: `ghcr.io/innovatics-lab/moodle` · [Releases](https://github.com/Innovat
 ## Versions
 
 - **5.0.2:** published and used for a completed production migration from Bitnami.
-- **5.3.0:** this branch targets Moodle 5.3, PHP 8.4 and MariaDB 11.4. Fresh-install tests and a restored-site upgrade have passed locally. Publication and production rollout are separate steps.
+- **5.3.0:** deployed following fresh-install tests and a restored-site upgrade from 5.0.2.
+- **5.3.1:** current build target, using PHP 8.4 and MariaDB 11.4. Release validation runs before image publication.
 
 Previous source versions are preserved in Git tags, such as `v5.0.2`. Use a version tag to browse or check out its matching Dockerfile, Compose file and documentation. There is no duplicated directory for every release. See [release policy](docs/release.md).
 
@@ -45,8 +46,8 @@ For existing sites, restore the database, uploaded files and compatible plugins 
 ## Validation
 
 ```sh
-TEST_IMAGE=ghcr.io/innovatics-lab/moodle:5.3.0 python3 tests/test_volumes.py
-TEST_IMAGE=ghcr.io/innovatics-lab/moodle:5.3.0 \
+TEST_IMAGE=ghcr.io/innovatics-lab/moodle:5.3.1 python3 tests/test_volumes.py
+TEST_IMAGE=ghcr.io/innovatics-lab/moodle:5.3.1 \
   TEST_DB_IMAGE=mariadb:11.4.13 python3 tests/test_install.py
 ```
 

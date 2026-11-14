@@ -6,8 +6,8 @@
 
 ## Naming
 
-- Git release `v5.3.0` publishes image `ghcr.io/innovatics-lab/moodle:5.3.0`.
-- Packaging or dependency fixes for the same Moodle version use `v5.3.0-r1`, then `-r2`, and matching image tags.
+- Git release `v5.3.1` publishes image `ghcr.io/innovatics-lab/moodle:5.3.1`.
+- Packaging or dependency fixes for the same Moodle version use `v5.3.1-r1`, then `-r2`, and matching image tags.
 - Published version tags must not be moved or overwritten. The workflow checks for an existing registry tag and refuses replacement. This is a workflow guard, not registry-enforced immutability; restrict package write access too.
 - Production deployments use an explicitly selected version. No automatic Coolify deployment is triggered.
 
@@ -19,6 +19,6 @@ Release builds currently target Linux AMD64. Do not advertise ARM64 support unti
 
 ## Validation record
 
-5.0.2 was published and deployed following a successful restore rehearsal. For 5.3.0, local validation includes volume guards, fresh installation and a successful 5.0.2-to-5.3 database upgrade on a restored site. Final registry-pull testing and production rollout follow publication.
+5.0.2 was published and deployed following a successful restore rehearsal. 5.3.0 passed local volume and fresh-install tests, a restored-site upgrade and production rollout. The 5.3.1 update must pass its own image tests and restored-site rehearsal; earlier results do not validate the new image.
 
 Before each release, review changes and dependencies, run CI, check for private files and credentials, and review vulnerability scan results. Passing functional tests does not establish that an image has no vulnerabilities. Preserve release notes and rollback instructions alongside the release.

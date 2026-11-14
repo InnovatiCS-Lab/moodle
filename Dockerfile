@@ -2,8 +2,8 @@
 ARG PHP_IMAGE=php:8.4.27-apache-bookworm@sha256:5d55c49594dd833e2e4ff677b65f7d8ff48817f443a60691d9b2b382413bba42
 FROM composer:2.11.2@sha256:ca11f643d7791ebdd90a34fc20caf11380d434007ae539a9ea75cd9212e13dca AS composer
 FROM ${PHP_IMAGE} AS core
-ARG MOODLE_REF=v5.3.0
-ARG MOODLE_COMMIT=42622298fe06f9626d988d60b2bf589bd8f850e8
+ARG MOODLE_REF=v5.3.1
+ARG MOODLE_COMMIT=cfe123f26fc7071981fe949cb16cd5a08a8234f1
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git ca-certificates util-linux libicu-dev libzip-dev libpng-dev libjpeg62-turbo-dev \
     libfreetype6-dev libxml2-dev libonig-dev libpq-dev \

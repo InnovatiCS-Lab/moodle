@@ -5,7 +5,7 @@ import subprocess
 import time
 import uuid
 
-image = os.environ.get('TEST_IMAGE', 'ghcr.io/innovatics-lab/moodle:5.3.0')
+image = os.environ.get('TEST_IMAGE', 'ghcr.io/innovatics-lab/moodle:5.3.1')
 dbimage = os.environ.get('TEST_DB_IMAGE', 'mariadb:11.4.13')
 prefix = 'moodle-install-' + uuid.uuid4().hex
 network, db, web = prefix, prefix + '-db', prefix + '-web'

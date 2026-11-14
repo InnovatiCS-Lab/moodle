@@ -3,7 +3,7 @@ import os
 import subprocess
 import uuid
 
-image = os.environ.get('TEST_IMAGE', 'ghcr.io/innovatics-lab/moodle:5.3.0')
+image = os.environ.get('TEST_IMAGE', 'ghcr.io/innovatics-lab/moodle:5.3.1')
 prefix = 'moodle-ci-' + uuid.uuid4().hex
 volumes = [prefix + '-code', prefix + '-data']
 base = ['docker', 'run', '--rm', '--network', 'none', '-v', volumes[0] + ':/innovatics/moodle', '-v', volumes[1] + ':/innovatics/moodledata']
