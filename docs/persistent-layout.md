@@ -1,16 +1,13 @@
 # Persistent code and data
 
-For the 5.3 candidate, see [upgrade details](upgrade-5.3.md). Apache serves `/innovatics/moodle/public`, and the version guard checks `public/version.php`. The following describes the released 5.0.2 layout.
+Two application volumes persist across container replacement: `/innovatics/moodle` for code, configuration and plugins, and `/innovatics/moodledata` for uploaded files and runtime data. Database storage is separate.
 
+For Moodle 5.3, Apache serves only `/innovatics/moodle/public`. Plugins and themes live beneath that directory. See [version notes](versions/README.md) for migration differences.
 
-One image: ghcr.io/innovatics-lab/moodle:5.0.2 (released). Two application volumes: /innovatics/moodle for code including plugins/themes, /innovatics/moodledata for uploaded data. Database storage is separate.
+The image carries pristine code in `/opt/moodle/core` and environment-driven configuration in `/opt/moodle/runtime/config.php`. On an empty code volume the entrypoint copies the seed under an exclusive lock and creates the root config.php wrapper. It does not install the database. Interrupted initialisation fails closed.
 
-The image carries pristine Moodle in /opt/moodle/core and runtime configuration in /opt/moodle/runtime/config.php. Apache serves the persistent code through /var/www/html, a symlink. On an empty code volume the root entrypoint copies the seed under an exclusive lock and creates a small config.php wrapper. It does not install the database. An interrupted copy fails closed on the next start.
+Existing core is never overlaid on restart. Its `public/version.php` must match the seed and config.php must be the supported wrapper; otherwise startup stops. This is a version guard, not a full integrity or plugin-compatibility audit. Unknown configuration is not overwritten. Compatible extensions persist without rebuilding the image; web-based plugin installation remains disabled.
 
-Existing code is never overlaid on restart. version.php must match the seed and config.php must be the known wrapper; otherwise startup stops with a migration message. The version comparison is a guard, not a full integrity or compatibility audit. Unknown old config.php is not overwritten or printed. Existing extensions persist without an image rebuild. Server-side migration scripts may copy reviewed extension directories into the code volume. Web-based plugin installation remains disabled; code is initially root-owned.
+Upgrades require fresh core and reviewed compatible extensions. Do not overlay an old core tree or blindly copy a Bitnami config.php. Changing only the image tag does not update persistent files or the database. Never delete production volumes to bypass the guard.
 
-For migration: initialise a NEW code volume from the image, copy compatible third-party extension directories into it (including complete theme config.php files), restore the database and moodledata separately, set permissions and environment, then validate. Do not blindly copy an old Bitnami config.php or overlay the old entire core. Apply any necessary plugin compatibility patches to the private volume through a reviewed migration script.
-
-Upgrades are out of scope for this same-version baseline. Changing the image tag to a different Moodle core does NOT silently update persistent code. A tested explicit upgrade command must be supplied before advertising that workflow. Never remove production volumes to bypass the guard.
-
-The original local Compose used pull_policy: never while this image has not been published. Build first. A community production template will use the released registry artifact, not this local build policy. Existing private test Compose files still use the old layout and are deliberately unchanged until this refactor passes isolated tests.
+Use the [general upgrade rules](versions/README.md#upgrade-rules-for-every-environment) and, for Coolify, the [upgrade runbook](../coolify/upgrade.md). Keep private plugins, patches and site data outside the public image and repository.
