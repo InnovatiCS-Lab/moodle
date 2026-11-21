@@ -1,5 +1,5 @@
 # Reproducible base; deployments continue to use readable release tags.
-ARG PHP_IMAGE=php:8.4.27-apache-bookworm@sha256:5d55c49594dd833e2e4ff677b65f7d8ff48817f443a60691d9b2b382413bba42
+ARG PHP_IMAGE=php:8.4.28-apache-bookworm@sha256:530fe79ff4c2737a4de714a7b1e6c741dbdb3dafcee0ce49a2b4993ca11ad7dd
 FROM composer:2.11.2@sha256:ca11f643d7791ebdd90a34fc20caf11380d434007ae539a9ea75cd9212e13dca AS composer
 FROM ${PHP_IMAGE} AS core
 ARG MOODLE_REF=v5.3.1

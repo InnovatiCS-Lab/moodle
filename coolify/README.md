@@ -31,7 +31,7 @@ This command runs **inside the container**. From the server shell, prefix it wit
 
 ## Versions
 
-Keep one Compose template and one upgrade procedure. Git release tags preserve old templates. Each target's [upgrade notes](../docs/upgrade-5.3.md) record supported source versions, database requirements and layout changes. Do not assume an unlisted version jump works; rehearse it first. Use explicit image versions, never `latest`. Release tags must not be overwritten; our publication workflow checks this, but a tag is not a registry-enforced immutable digest.
+Keep one Compose template and one upgrade procedure. Git release tags preserve old templates. Each target's [upgrade notes](../docs/versions/README.md) record supported source versions, database requirements and layout changes. Do not assume an unlisted version jump works; rehearse it first. Use explicit image versions, never `latest`. Release tags must not be overwritten; our publication workflow checks this, but a tag is not a registry-enforced immutable digest.
 
 ## Console locations
 

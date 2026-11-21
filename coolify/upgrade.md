@@ -1,8 +1,26 @@
 # Coolify upgrade runbook
 
+## Same-stack patch updates
+
+For a rehearsed update with unchanged database engine, storage layout and configuration, such as 5.3.0 → 5.3.1:
+
+1. Pull and test the target image before downtime.
+2. Pause cron and external writers, enable maintenance, wait for active workers and stop web. Inspect with `docker top YOUR_WEB -eo pid,user,etime,args`; an inspection error is a stop condition.
+3. Take a matched database, code, moodledata and deployment backup and verify an off-server copy.
+4. Stage fresh core from the target image; preserve the environment-driven config and all reviewed compatible plugins. Retain old code separately. Do not overlay new core onto old files.
+5. Change the web image in the existing Coolify Compose file and deploy. Keep the database image, volumes, environment and domain unchanged. Leave maintenance enabled and cron disabled.
+6. Inside the new web container, as `www-data`, run `php /innovatics/moodle/admin/cli/upgrade.php --non-interactive`, then `php /innovatics/moodle/admin/cli/purge_caches.php`. Stop on any error.
+7. Disable maintenance; test login, courses, profile save, files and email. Resume the existing cron task and take a post-upgrade backup.
+
+Old code alone is not a rollback. Once the database upgrade has been attempted, restore the matched database/code/moodledata backup if recovery is needed. Account for new writes after reopening before restoring an old backup.
+
+For larger upgrades, database-engine/layout changes, or an isolated destination, follow the separate-stack procedure below. A patch number alone does not establish compatibility.
+
+## Separate-stack upgrades
+
 For this image → this image, using a **new stack and new volumes**. Run server commands in **Bash as root on the Docker host**. Run sections separately; stop at any error. Rehearse the same procedure on an isolated copy first.
 
-Read the target notes: [5.0.2 → 5.3.0](../docs/upgrade-5.3.md) or [5.3.0 → 5.3.1](../docs/upgrade-5.3.1.md). Never change only the image tag on an old code volume, or attach a newer MariaDB to the old raw database volume.
+Read the shared [version requirements](../docs/versions/README.md) before choosing a path. Never change only the image tag on an old code volume, or attach a newer MariaDB to the old raw database volume.
 
 ## 1. Prepare, while the live site stays open
 

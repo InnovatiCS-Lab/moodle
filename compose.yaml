@@ -1,6 +1,6 @@
 name: moodle
 x-app: &app
-  image: ghcr.io/innovatics-lab/moodle:5.3.1
+  image: ghcr.io/innovatics-lab/moodle:5.3.1-r1
   pull_policy: never
   build:
     context: .

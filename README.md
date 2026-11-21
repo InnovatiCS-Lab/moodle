@@ -18,7 +18,7 @@ Images: `ghcr.io/innovatics-lab/moodle` · [Releases](https://github.com/Innovat
 
 - **5.0.2:** published and used for a completed production migration from Bitnami.
 - **5.3.0:** deployed following fresh-install tests and a restored-site upgrade from 5.0.2.
-- **5.3.1:** current build target, using PHP 8.4 and MariaDB 11.4. Release validation runs before image publication.
+- **5.3.1-r1:** current build target, using Moodle 5.3.1, PHP 8.4.28 and MariaDB 11.4. Release validation runs before image publication.
 
 Previous source versions are preserved in Git tags, such as `v5.0.2`. Use a version tag to browse or check out its matching Dockerfile, Compose file and documentation. There is no duplicated directory for every release. See [release policy](docs/release.md).
 
@@ -46,8 +46,8 @@ For existing sites, restore the database, uploaded files and compatible plugins 
 ## Validation
 
 ```sh
-TEST_IMAGE=ghcr.io/innovatics-lab/moodle:5.3.1 python3 tests/test_volumes.py
-TEST_IMAGE=ghcr.io/innovatics-lab/moodle:5.3.1 \
+TEST_IMAGE=ghcr.io/innovatics-lab/moodle:5.3.1-r1 python3 tests/test_volumes.py
+TEST_IMAGE=ghcr.io/innovatics-lab/moodle:5.3.1-r1 \
   TEST_DB_IMAGE=mariadb:11.4.13 python3 tests/test_install.py
 ```
 
@@ -61,7 +61,7 @@ Use the same image for web and cron. Keep the database on a private network, con
 
 For Coolify, start with the [deployment template and console instructions](coolify/README.md) and [upgrade commands with rollback](coolify/upgrade.md).
 
-Before upgrading, back up the database, code and moodledata together and rehearse restoration. See [5.3 upgrade guide](docs/upgrade-5.3.md), [persistent layout](docs/persistent-layout.md) and [runtime configuration](docs/runtime.md).
+Before upgrading, back up the database, code and moodledata together and rehearse restoration. See [version requirements and upgrade rules](docs/versions/README.md), [persistent layout](docs/persistent-layout.md) and [runtime configuration](docs/runtime.md).
 
 ## License
 
