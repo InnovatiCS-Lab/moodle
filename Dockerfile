@@ -5,7 +5,7 @@ FROM ${PHP_IMAGE} AS core
 ARG MOODLE_REF=v5.3.1
 ARG MOODLE_COMMIT=cfe123f26fc7071981fe949cb16cd5a08a8234f1
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git ca-certificates util-linux libicu-dev libzip-dev libpng-dev libjpeg62-turbo-dev \
+    git ca-certificates util-linux ghostscript libicu-dev libzip-dev libpng-dev libjpeg62-turbo-dev \
     libfreetype6-dev libxml2-dev libonig-dev libpq-dev \
  && docker-php-ext-configure gd --with-freetype --with-jpeg \
  && docker-php-ext-install -j2 mysqli intl zip gd soap exif opcache mbstring \

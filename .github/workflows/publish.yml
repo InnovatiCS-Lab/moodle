@@ -46,6 +46,8 @@ jobs:
             --label "org.opencontainers.image.version=$VERSION" \
             --label org.opencontainers.image.licenses=GPL-3.0-or-later \
             --tag "$IMAGE:$VERSION" .
+      - name: Test PDF annotation dependency
+        run: TEST_IMAGE="$IMAGE:$VERSION" python3 tests/test_pdf.py
       - name: Validate persistent volumes
         run: TEST_IMAGE="$IMAGE:$VERSION" python3 tests/test_volumes.py
       - name: Test fresh installation and HTTP isolation
