@@ -23,6 +23,8 @@ jobs:
             --build-arg MOODLE_REF="$(sed -n 's/^MOODLE_REF=//p' .env.example)" \
             --build-arg MOODLE_COMMIT="$(sed -n 's/^MOODLE_COMMIT=//p' .env.example)" \
             --tag moodle-ci:test .
+      - name: Test PDF annotation dependency
+        run: TEST_IMAGE="moodle-ci:test" python3 tests/test_pdf.py
       - name: Test isolated persistent volumes
         env:
           TEST_IMAGE: moodle-ci:test

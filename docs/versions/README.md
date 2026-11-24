@@ -40,3 +40,7 @@ After testing and backing up, pause cron and deploy the new image to web and any
 5. Retain the matched backup. Once a database upgrade has been attempted, old code alone is not a rollback. Account for activity written after reopening before restoring older data.
 
 Coolify console steps and commands live in the single [upgrade runbook](../../coolify/upgrade.md). Other environments apply these rules using their own deployment tooling. See [persistent storage](../persistent-layout.md), [runtime configuration](../runtime.md) and [release policy](../release.md).
+
+### 5.3.1-r2
+
+Adds Ghostscript for assignment PDF annotation and a conversion/rendering check running as `www-data`. Moodle core and PHP versions are unchanged from r1; this image-only update does not require a Moodle database upgrade.
